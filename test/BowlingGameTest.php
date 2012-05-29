@@ -10,7 +10,26 @@ class BowlingGameTest extends PHPUnit_Framework_TestCase {
 		$this->game = new BowlingGame();
 	}
 
-	public function testStartHere(){
-		$this->fail('');
+    /**
+     * @test
+     */
+	public function bowl(){
+        $this->game->bowl(3);
+        $this->game->bowl(4);
 	}
+
+    /**
+     * @test
+     */
+    public function bowl_spare() {
+        $this->game->bowl(3);
+        $this->game->bowl(7);
+    }
+
+    /**
+     * @test
+     */
+    public function bowl_strike() {
+
+    }
 }

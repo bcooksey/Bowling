@@ -52,4 +52,12 @@ class FrameTest extends PHPUnit_Framework_TestCase {
         $this->frame->addRoll(1);
         $this->assertTrue($this->frame->isClosed());
     }
+
+    /**
+     * @test
+     */
+    public function isClose_strike() {
+        $this->frame->addRoll(10);
+        $this->assertTrue($this->frame->isClosed());
+    }
 }

@@ -18,6 +18,11 @@ class Frame {
     }
 
     public function isClosed() {
-        return (count($this->rolls) == 2) ? true : false;
+        if ($this->rolls[0] == 10) {
+            return true;
+        }
+        else {
+            return (count($this->rolls) == 2) ? true : false;
+        }
     }
 }

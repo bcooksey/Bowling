@@ -1,14 +1,30 @@
 <?php
 
 include_once 'src/Frame.php';
+include_once 'src/TenthFrame.php';
 
 class BowlingGame {
     protected $frames;
     protected $current_frame;
 	
 	public function bowl($score){
-        if (is_null($this->current_frame) || $this->current_frame->isClosed()) {
-            $this->current_frame = new Frame();
+        if (is_null($this->current_frame)) {
+            // Start of game
+            $this->current_frame = new Frame();   
+            $this->frames[] = $this->current_frame;
+        }
+        elseif ($this->current_frame->isClosed()) {
+
+            if (count($this->frames) == 10) {
+                throw new Exception('Game is over');
+            }
+            elseif (count($this->frames) == 9) {
+                $this->current_frame = new TenthFrame();   
+            }
+            else {
+                $this->current_frame = new Frame();
+            }
+
             $this->frames[] = $this->current_frame;
         }
 

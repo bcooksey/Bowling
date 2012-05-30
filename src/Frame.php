@@ -1,7 +1,7 @@
 <?php
 
 class Frame {
-    private $rolls = array();
+    protected $rolls = array();
 
     public function getRolls() { return $this->rolls; }
 

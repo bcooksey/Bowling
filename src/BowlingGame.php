@@ -1,83 +1,93 @@
 <?php
 
+
+// Post Roll checks
+//   if current frame is now closed
+//     if two frames ago and last frame are srikes
+//        add current score to two frames ago
+//     if last frame is a strike or a spare
+//        add current score to last frame
+//
+//     do frame swapping
+//
+// Pre Roll checks
+//    if current frame is now closed
+//       do score updain
+
 include_once 'src/Frame.php';
+include_once 'src/FrameWithRollAfter.php';
 include_once 'src/TenthFrame.php';
 
 class BowlingGame {
-    protected $frames;
+    protected $frames = array();
     protected $current_frame;
+    protected $previous_frame;
+    protected $two_frames_ago;
+    protected $game_over = false;
+
+    public function __construct() {
+        $this->current_frame = &$this->frames[];
+        $this->current_frame = new Frame();
+    }
 	
 	public function bowl($score){
-        if (is_null($this->current_frame)) {
-            // Start of game
-            $this->current_frame = new Frame();   
-            $this->frames[] = $this->current_frame;
-        }
-        elseif ($this->current_frame->isClosed()) {
-
-            if (count($this->frames) == 10) {
-                throw new Exception('Game is over');
-            }
-            elseif (count($this->frames) == 9) {
-                $this->current_frame = new TenthFrame();   
-            }
-            else {
-                $this->current_frame = new Frame();
-            }
-
-            $this->frames[] = $this->current_frame;
+        if ($this->game_over == true) {
+            return;
         }
 
         $this->current_frame->addRoll($score);
-	}
-
-    public function getScore() {
+        
         // Scoring Rules:
         //   Open Frame - Total Pins
         //   Spare - 10 + next roll
         //   Strike - 10 + next 2 rolls
 
-        $score = 0;
-        for ($i = 0; $i < count($this->frames); $i++) {
-            if ($this->frames[$i]->isStrike()) {
-                $score += $this->scoreStrike($i);
+        if ($this->current_frame->isClosed()) {
+            if (count($this->frames) == 10) {
+                $this->game_over = true;
             }
-            elseif ($this->frames[$i]->isSpare()) {
-                $score += $this->scoreSpare($i);
+            elseif (count($this->frames) == 9) {
+                $this->current_frame = new TenthFrame();   
+
+                $this->frames[] = $this->current_frame;
+
+                // TODO: Some other swapping
             }
             else {
-                $score += array_sum($this->frames[$i]->getRolls());
+                // Handle previous frame
+                if ( isset($this->previous_frame) && $this->previous_frame->isStrike() ) {
+                    $this->previous_frame = new FrameWithRollAfter($this->previous_frame, $score);
+                }
+                
+                // Sawp frames
+//                echo "~~~~~~~~ Frames before ~~~~~~~~\n";
+//                var_dump($this->frames);
+                $this->two_frames_ago = &$this->previous_frame;
+                $this->previous_frame = &$this->current_frame;
+                $this->current_frame  = &$this->frames[];
+                $this->current_frame  = new Frame();
+//                echo "\n ~~~~~~~~~~ Frames after ~~~~~~~~\n";
+//                var_dump($this->frames);
             }
+        }
+        else {
+            // Take care of two frames ago
+            if (isset($this->two_frames_ago) && $this->two_frames_ago->isStrike() && $this->previous_frame->isStrike()) {
+                $this->two_frames_ago = new FrameWithRollAfter($this->two_frames_ago, $score);
+            }
+
+            // Handle previous frame
+            if (isset($this->previous_frame) && ($this->previous_frame->isStrike() || $this->previous_frame->isSpare()) ) {
+                $this->previous_frame = new FrameWithRollAfter($this->previous_frame, $score);
+            }
+        }
+	}
+
+    public function getScore() {
+        $score = 0;
+        for ($i = 0; $i < count($this->frames); $i++) {
+            $score += $this->frames[$i]->getScore();
         }
         return $score;
 	}
-
-    protected function scoreStrike($i) {
-        $frame_score = 0;
-        if (isset($this->frames[$i+1])) {
-            $next_frame = $this->frames[$i+1];
-            if ($next_frame->isStrike()) {
-                if (isset($this->frames[$i+2])) {
-                    $frame_score += array_pop($this->frames[$i+2]->getRolls());
-                }
-                $frame_score += 10; // Next strike
-            }
-            else {
-                $frame_score += array_sum($next_frame->getRolls());
-            }
-        }
-
-        $frame_score += 10; // Current Strike
-        return $frame_score;
-    }
-
-    protected function scoreSpare() {
-        $frame_score = 0;
-        if (isset($this->frames[$i+1])) {
-            $frame_score += array_pop($this->frames[$i+1]->getRolls());
-        }
-
-        $frame_score += 10; // Current Spare
-        return $frame_score;
-    }
 }

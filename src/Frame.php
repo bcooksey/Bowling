@@ -3,6 +3,10 @@
 class Frame {
     protected $rolls = array();
 
+    public function getScore() {
+        return array_sum($this->rolls); 
+    }
+
     public function getRolls() { return $this->rolls; }
 
     public function addRoll($score) {

@@ -53,6 +53,18 @@ class BowlingGameTest extends PHPUnit_Framework_TestCase {
     /**
      * @test
      */
+    public function bowl_turkey() {
+        $this->game->bowl(10);
+        $this->game->bowl(10);
+        $this->game->bowl(10);
+        $this->game->bowl(2);
+        $this->game->bowl(2);
+        $this->assertEquals(70, $this->game->getScore());
+    }
+
+    /**
+     * @test
+     */
     public function bowl_tenth_frame() {
         for ($i = 0; $i < 18; $i++) {
             $this->game->bowl(0);
@@ -60,6 +72,6 @@ class BowlingGameTest extends PHPUnit_Framework_TestCase {
         $this->game->bowl(10);
         $this->game->bowl(10);
         $this->game->bowl(10);
-        $this->assertEquals(60, $this->game->getScore());
+        $this->assertEquals(30, $this->game->getScore());
     }
 }
